@@ -1,0 +1,70 @@
+diff --git a/docs/living/architecture.md b/docs/living/architecture.md
+index 476dd3e..e133773 100644
+--- a/docs/living/architecture.md
++++ b/docs/living/architecture.md
+@@ -1,7 +1,7 @@
+ # Architecture — Current Sprint: Sprint 4
+ 
+ > **Living document.** Updated each sprint. See `docs/checkpoints/` for snapshots.  
+-> **Last updated:** S4_2
++> **Last updated:** S4_3
+ 
+ ---
+ 
+@@ -115,3 +115,56 @@ create_app()              → FileTaskRepository()      → tasks.json
+ create_app(use_db=True)   → DatabaseTaskRepository()  → tasks.db
+ create_app(service=mock)  → mocker.MagicMock()        → no I/O
+ ```
++
++---
++
++## CI/CD Architecture — End of Sprint 4
++
++### Workflow Files
++
++| Workflow | File | Trigger | What it runs |
++|----------|------|---------|--------------|
++| Python CI | `.github/workflows/python-app.yml` | Every PR (not on merge) | One job: ruff → mypy → unit tests (`pytest -m "not ui"`) → start Flask → API tests → stop Flask |
++| Playwright UI Tests | `.github/workflows/playwright.yml` | PR to main + `workflow_dispatch` | Install Chromium → start Flask → `pytest -m ui` → stop Flask |
++
++### Why Two Workflows?
++`python-app.yml` must be fast — it runs on every PR. Playwright tests require
++Chromium installation and a running Flask server — adding them would add 2–3 minutes
++to every PR's main check. Separate workflows keep fast feedback fast, and each
++shows as its own check on the PR. Both workflows run on PRs only and skip
++image/docs-only changes (S4_1 CI Pipeline Tune-Up).
++
++### Pipeline Hardening (closes the S3_2 CI finding)
++
++| Safeguard | Where | Why |
++|-----------|-------|-----|
++| `setup-uv` pinned to `version: "0.13.0"` | Both workflows | Permanent fix for environment drift — uv only changes when the team changes the number through a PR |
++| `Stop Flask server` with `if: always()` | Both workflows | Teardown — every job that starts a server stops it, even when a test step fails (immediate fix from S3_2, now applied to `playwright.yml` too) |
++
++Everything that can drift is now pinned: Python packages (`uv.lock`), Python (`python-version: "3.13"`), and uv itself.
++
++### pytest Markers
++- `@pytest.mark.ui` — Playwright browser tests
++- Defined in `pyproject.toml` → `[tool.pytest.ini_options]` → `markers`
++
++## Tool Configuration — pyproject.toml (Complete as of S4_3)
++
++`pytest.ini` deleted in S4_3. All tool configuration now in `pyproject.toml`.
++
++| Tool | Section | Key Settings |
++|------|---------|--------------|
++| mypy | `[tool.mypy]` | `disallow_untyped_defs`, `exclude` |
++| ruff | `[tool.ruff]` | `line-length = 88`, `target-version` |
++| ruff lint | `[tool.ruff.lint]` | `select = ["E", "F", "W", "I"]` |
++| bandit | `[tool.bandit]` | `exclude_dirs` — read only with `-c pyproject.toml`; path stays on the CLI (`-r app/`) |
++| pytest | `[tool.pytest.ini_options]` | `pythonpath`, `testpaths`, `addopts`, `markers` |
++
++Single source of truth: one file, one syntax, consistent across terminal and CI.
++
++### Dependency Removed — S4_3
++
++| Package | Decision | Reason |
++|---------|----------|--------|
++| `robotframework-browser` | Removed from dev dependencies | No test imports it; its init step required Node.js, which the project does not use. S5_2 Robot tests use `RequestsLibrary`. |
++
++Rule applied: every dependency must have a consumer — a test that imports it, a tool that reads it, or a CI step that runs it. Entries without one are removed.

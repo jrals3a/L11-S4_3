@@ -1,0 +1,81 @@
+diff --git a/docs/living/test_cases.md b/docs/living/test_cases.md
+index 2b5e808..5ecbb81 100644
+--- a/docs/living/test_cases.md
++++ b/docs/living/test_cases.md
+@@ -1,7 +1,7 @@
+ # Test Cases — Current Sprint: Sprint 4
+ 
+ > **Living document.** Updated each sprint. See `docs/checkpoints/` for snapshots.  
+-> **Last updated:** S4_2
++> **Last updated:** S4_3
+ 
+ ---
+ 
+@@ -664,3 +664,67 @@ Test cases for US000–US004. Each case maps to acceptance criteria in `tt_user_
+ | **Type** | Manual (Browser — US033) |
+ | **Steps** | Click **Complete** on one task → click **Delete** on another |
+ | **Expected** | Completed task shows strikethrough and loses its Complete button; deleted task disappears |
++
++---
++
++## RF014 — Playwright UI Tests
++
++### TC-RF014-001: test_add_task
++| Field | Detail |
++|-------|--------|
++| **ID** | TC-RF014-001 |
++| **Type** | Automated (Playwright — `@pytest.mark.ui`) |
++| **Description** | Add task via browser form — complete workflow |
++| **Expected** | Task appears in task list after submit |
++
++### TC-RF014-002: test_form_validation_empty_title
++| Field | Detail |
++|-------|--------|
++| **ID** | TC-RF014-002 |
++| **Type** | Automated (Playwright — `@pytest.mark.ui`) |
++| **Description** | Submit form with empty title |
++| **Expected** | Error message shown; stays on form |
++
++### TC-RF014-003: test_complete_task
++| Field | Detail |
++|-------|--------|
++| **ID** | TC-RF014-003 |
++| **Type** | Automated (Playwright — `@pytest.mark.ui`) |
++| **Description** | Click Complete button in browser |
++| **Expected** | Task shows strikethrough styling |
++
++### TC-RF014-004: test_delete_task
++| Field | Detail |
++|-------|--------|
++| **ID** | TC-RF014-004 |
++| **Type** | Automated (Playwright — `@pytest.mark.ui`) |
++| **Description** | Click Delete button in browser |
++| **Expected** | Task removed from list |
++
++### TC-RF014-005: test_end_to_end_workflow
++| Field | Detail |
++|-------|--------|
++| **ID** | TC-RF014-005 |
++| **Type** | Automated (Playwright — `@pytest.mark.ui`) |
++| **Description** | Chain: add → complete → delete in one session |
++| **Expected** | All steps complete without error |
++
++---
++
++## CI — Pipeline Hardening (closes S3_2 finding)
++
++### TC-CI-002: uv Version Pinned in Every Workflow
++| Field | Detail |
++|-------|--------|
++| **ID** | TC-CI-002 |
++| **Type** | Manual (CI verification) |
++| **Steps** | Open `python-app.yml` and `playwright.yml` → find every `astral-sh/setup-uv` step |
++| **Expected** | Each has `with: version: "0.13.0"`; no floating tag runs unpinned |
++
++### TC-CI-003: Playwright Workflow Stops Flask After Tests
++| Field | Detail |
++|-------|--------|
++| **ID** | TC-CI-003 |
++| **Type** | Manual (CI verification) |
++| **Steps** | Open the **Playwright UI Tests** check on the Phase 2 PR → expand the job steps |
++| **Expected** | `Stop Flask server` step runs last and is green; `Post Install uv` completes without a 5-minute wait |

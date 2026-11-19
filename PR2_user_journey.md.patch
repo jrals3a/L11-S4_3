@@ -1,0 +1,32 @@
+diff --git a/docs/living/user_journey.md b/docs/living/user_journey.md
+index 90cd98b..de331e7 100644
+--- a/docs/living/user_journey.md
++++ b/docs/living/user_journey.md
+@@ -1,7 +1,7 @@
+ # User Journey — Current Sprint: Sprint 4
+ 
+ > **Living document.** Updated when UI changes. See `docs/checkpoints/` for snapshots.  
+-> **Last updated:** S4_2
++> **Last updated:** S4_3
+ 
+ ---
+ 
+@@ -93,3 +93,18 @@ This prevents duplicate form submissions if the user refreshes after an action.
+ | Back-end (UI) | `ui.py` server-side check | Bypassed front-end validation |
+ | Back-end (Service) | `TaskService.add_task()` ValueError | Invalid data from any source |
+ | Database | `NOT NULL` constraint | Direct DB writes without service layer |
++
++---
++
++## User Journey → Playwright Test Coverage (S4_3)
++
++| Journey | Playwright Test | TC ID |
++|---------|----------------|-------|
++| Add a New Task | `test_add_task` | TC-RF014-001 |
++| Add — Validation (empty title) | `test_form_validation_empty_title` | TC-RF014-002 |
++| Complete a Task | `test_complete_task` | TC-RF014-003 |
++| Delete a Task | `test_delete_task` | TC-RF014-004 |
++| Full workflow (all journeys) | `test_end_to_end_workflow` | TC-RF014-005 |
++
++The user journey document served as the test specification for S4_3.
++Writing clear journey steps before development makes automation straightforward.

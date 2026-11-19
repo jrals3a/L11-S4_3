@@ -1,0 +1,18 @@
+diff --git a/docs/living/api_reference.md b/docs/living/api_reference.md
+index b4be153..d0095bf 100644
+--- a/docs/living/api_reference.md
++++ b/docs/living/api_reference.md
+@@ -1,10 +1,12 @@
+ # API Reference — Current Sprint: Sprint 4
+ 
+ > **Living document.** Updated each sprint when endpoints change.  
+-> **Last updated:** S4_2  
++> **Last updated:** S4_3  
+ > **Environment:** Local (`http://127.0.0.1:5000`)  
+ > **Authentication:** Not required
+ 
++<!-- S4_3: No changes — Playwright tests drive existing UI routes. API unchanged. -->
++
+ ---
+ 
+ ## GET /api/health

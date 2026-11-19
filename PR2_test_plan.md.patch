@@ -1,0 +1,64 @@
+diff --git a/docs/living/test_plan.md b/docs/living/test_plan.md
+index 7895a74..1398ce4 100644
+--- a/docs/living/test_plan.md
++++ b/docs/living/test_plan.md
+@@ -1,7 +1,7 @@
+ # Test Plan — Current Sprint: Sprint 4
+ 
+ > **Living document.** Updated each sprint. See `docs/checkpoints/` for snapshots.  
+-> **Last updated:** S4_2
++> **Last updated:** S4_3
+ 
+ ---
+ 
+@@ -45,6 +45,10 @@ This document outlines the testing strategy for the TaskTracker project, current
+ | OBJ-29 | Verify `DatabaseTaskRepository` satisfies `ITaskRepository` | All contract tests pass with DB backend |
+ | OBJ-30 | Verify the home route redirects to the add-task form | Flask test client — `test_app_factory.py` (TC-US000-003) |
+ | OBJ-31 | Verify manual UI workflow end-to-end | Browser verification — US033 |
++| OBJ-32 | Verify Playwright UI tests cover all user journeys | 5 `@pytest.mark.ui` tests pass |
++| OBJ-33 | Verify marker strategy separates CI workflows correctly | `pytest -m "not ui"` clean in python-app.yml; `pytest -m ui` runs in playwright.yml |
++| OBJ-34 | Verify pyproject.toml is complete single source of truth | `pytest.ini` deleted; all tools configured in pyproject.toml |
++| OBJ-35 | Verify CI pipeline hardening from the S3_2 finding is complete | uv pinned to `0.13.0` in both workflows; `Stop Flask server` (`if: always()`) in every job that starts Flask |
+ 
+ ## Test Scope
+ 
+@@ -196,11 +200,36 @@ When the `test` job was extended to start a Flask server for E2E tests, SQA/DevO
+ | Action | When | Status |
+ |--------|------|--------|
+ | Added `Stop Flask server` step with `if: always()` to the `test` job | S3_2 | ✅ Done — immediate fix |
+-| Logged issue `CI: pin uv version in GitHub Actions workflows` (#N) | S3_2 | 🔓 Open |
+-| Pin uv version on every `setup-uv` step | S4_3 | ⏳ Planned — permanent fix |
++| Logged issue `CI: pin uv version in GitHub Actions workflows` (#N) | S3_2 | ✅ Closed — by the S4_3 Phase 2 PR |
++| Pin uv version on every `setup-uv` step | S4_3 | ✅ Done — permanent fix (`version: "0.13.0"` in `python-app.yml` and `playwright.yml`) |
+ 
+ ### Risk
+ 
+ | Risk | Likelihood | Impact | Mitigation |
+ |------|-----------|--------|------------|
+-| Unpinned CI tools (uv) change behavior between runs and break CI with no code change | Medium | High — all PRs blocked | Teardown step added (S3_2); version pinning planned (S4_3, issue #N) |
++| Unpinned CI tools (uv) change behavior between runs and break CI with no code change | Medium | High — all PRs blocked | Mitigated in S4_3 — uv pinned in both workflows, `Stop Flask server` teardown in both workflows. Pin reviewed before each semester. |
++
++### S4_3 Closure
++
++- **Permanent fix applied:** `setup-uv` pinned to `version: "0.13.0"` in `python-app.yml` and `playwright.yml` — environment drift eliminated
++- **Teardown extended:** `Stop Flask server` (`if: always()`) added to `playwright.yml`; `python-app.yml` kept its step from S3_2
++- **Tracking issue closed:** `CI: pin uv version in GitHub Actions workflows` (#N) — closed by the S4_3 Phase 2 PR
++- **Verified by:** TC-CI-002, TC-CI-003
++
++## pytest Marker Strategy (S4_3 SQA Decision)
++
++Markers control which workflow runs which tests:
++
++| Marker | Tests Tagged | CI Workflow | When it Runs |
++|--------|-------------|-------------|--------------|
++| `ui` | Playwright browser tests | `playwright.yml` | PR to main + manual |
++
++`python-app.yml` runs `pytest -m "not ui"` so browser tests never slow the main check. More markers follow the same pattern as new test types arrive in later sprints.
++
++Markers defined in: `pyproject.toml` → `[tool.pytest.ini_options]` → `markers`
++
++## User Journey as Test Specification
++
++The S4_2 user journey document served as the specification for S4_3 Playwright tests.
++Each journey step maps directly to a Playwright action. If the journey is well written,
++the test writes itself. If the test is hard to write, the journey was incomplete.
